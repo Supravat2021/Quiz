@@ -127,11 +127,11 @@ export function ActiveQuizScreen({
 
     onUpdateParticipant(updatedParticipant);
 
-    // Smooth auto-advance after 1.2s if not last question
+    // Smooth auto-advance after 1.1s if not last question
     if (!isLastQuestion) {
       autoAdvanceTimeoutRef.current = window.setTimeout(() => {
         advanceNextQuestion(updatedParticipant);
-      }, 1200);
+      }, 1100);
     }
   };
 
@@ -158,52 +158,58 @@ export function ActiveQuizScreen({
   const answeredCount = Object.keys(currentParticipant.answers || {}).length;
   const progressPercentage = ((questionIndex + 1) / QUIZ_QUESTIONS.length) * 100;
 
+  // Option Letter Badge Colors
+  const optionLetterBadges = {
+    A: 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-pink-500/30',
+    B: 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-purple-500/30',
+    C: 'bg-gradient-to-br from-teal-400 to-cyan-500 text-slate-950 shadow-teal-500/30',
+    D: 'bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-amber-500/30',
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-      {/* Top Header Bar: Minimalist Progress */}
-      <div className="mb-4 sm:mb-6 glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 border border-white/5">
+      {/* Top Header Bar: Clean Solid & Gradient Progress */}
+      <div className="mb-4 sm:mb-6 glass-panel rounded-3xl p-4 flex flex-wrap items-center justify-between gap-4 border-2 border-purple-500/20">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center font-mono font-bold text-amber-300 text-sm">
-            0{questionIndex + 1}
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center font-black text-white text-base shadow-lg shadow-pink-500/30">
+            {questionIndex + 1}
           </div>
           <div>
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-mono font-medium block">
+            <span className="text-xs uppercase tracking-wider text-pink-300 font-bold block">
               {currentQuestion.topic}
             </span>
-            <h3 className="text-sm font-bold text-white font-display">
-              Phase {questionIndex + 1} of {QUIZ_QUESTIONS.length}
+            <h3 className="text-base font-black text-white font-display">
+              Question {questionIndex + 1} of {QUIZ_QUESTIONS.length}
             </h3>
           </div>
         </div>
 
         {/* Status Indicators */}
         <div className="flex items-center gap-3">
-          {/* Answered Counter */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-300">
-            <CheckCircle2 className="w-3.5 h-3.5 text-teal-400" />
-            <span className="text-[11px] font-mono text-slate-400">
-              Recorded: <strong className="text-teal-300">{answeredCount}/10</strong>
-            </span>
+          {/* Answered Counter Pill */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-950/90 border border-indigo-500/40 text-xs font-bold text-white shadow-sm">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>Answered: <strong className="text-pink-300">{answeredCount}/10</strong></span>
           </div>
 
           {/* Timer Countdown Badge */}
           <div
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold border transition-colors ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-mono text-xs font-black shadow-md transition-all ${
               timeLeft <= 5
-                ? 'bg-rose-500/10 text-rose-300 border-rose-500/30 animate-pulse'
-                : 'bg-slate-950/60 text-amber-300 border-white/10'
+                ? 'bg-rose-500 text-white animate-pulse shadow-rose-500/40'
+                : 'bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-amber-400/30'
             }`}
           >
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <Clock className="w-4 h-4" />
             <span>{timeLeft}s</span>
           </div>
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full bg-slate-950/80 h-1.5 rounded-full mb-6 overflow-hidden border border-white/5">
+      {/* Saturated Gradient Progress Bar */}
+      <div className="w-full bg-slate-950/80 h-2.5 rounded-full mb-6 overflow-hidden border border-white/10 p-0.5">
         <div
-          className="h-full bg-gradient-to-r from-teal-400 via-amber-300 to-amber-500 transition-all duration-500 rounded-full"
+          className="h-full bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 transition-all duration-500 rounded-full shadow-lg shadow-pink-500/30"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
@@ -217,19 +223,19 @@ export function ActiveQuizScreen({
 
         {/* Right Column: Question Card & Options */}
         <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-between">
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl flex-1 flex flex-col justify-between">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 border-2 border-purple-500/25 shadow-2xl flex-1 flex flex-col justify-between">
             {/* Question Text */}
             <div>
               <div className="flex items-center justify-between mb-3.5">
-                <span className="inline-block px-3 py-1 rounded-full text-[10px] font-mono tracking-wider uppercase text-teal-300 bg-teal-950/40 border border-teal-800/40">
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-r from-indigo-500 to-purple-600 shadow-sm">
                   {currentQuestion.topic}
                 </span>
-                <span className="text-[10px] font-mono text-slate-500">
-                  Confidential scoring
+                <span className="text-xs font-bold text-pink-400">
+                  Scores reveal at the end!
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-bold font-display text-white mb-6 leading-snug">
+              <h2 className="text-xl sm:text-2xl font-black font-display text-white mb-6 leading-snug">
                 {currentQuestion.text}
               </h2>
 
@@ -238,14 +244,14 @@ export function ActiveQuizScreen({
                 {currentQuestion.options.map((option) => {
                   const isSelected = selectedOption === option.id;
 
-                  let buttonStyles =
-                    'bg-slate-950/50 hover:bg-slate-900/80 border-white/5 text-slate-300 hover:border-white/15 hover:text-white';
+                  let cardStyles =
+                    'bg-[#151433] hover:bg-[#1e1c45] border-2 border-purple-500/20 text-slate-100 hover:border-purple-400/50';
 
                   if (isSelected) {
-                    buttonStyles =
-                      'bg-amber-400/15 border-amber-400/60 text-amber-200 shadow-lg shadow-amber-500/15 font-semibold';
+                    cardStyles =
+                      'bg-gradient-to-r from-purple-900/60 to-indigo-900/60 border-2 border-pink-400 text-white shadow-xl shadow-pink-500/20 font-bold scale-[1.01]';
                   } else if (isAnswered) {
-                    buttonStyles = 'bg-slate-950/30 border-white/5 text-slate-600 opacity-60';
+                    cardStyles = 'bg-[#121128]/50 border-white/5 text-slate-500 opacity-50';
                   }
 
                   return (
@@ -256,21 +262,20 @@ export function ActiveQuizScreen({
                         playClickSound();
                         handleOptionSelect(option.id);
                       }}
-                      className={`w-full p-4 rounded-2xl border text-left flex items-start gap-3.5 transition-all cursor-pointer font-medium text-sm sm:text-base relative ${buttonStyles}`}
+                      className={`w-full p-4 rounded-2xl text-left flex items-start gap-4 transition-all cursor-pointer text-sm sm:text-base relative ${cardStyles}`}
                     >
+                      {/* Bold Colorful Solid Letter Badge */}
                       <span
-                        className={`w-7 h-7 rounded-xl flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-colors ${
-                          isSelected
-                            ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/30'
-                            : 'bg-slate-900 border border-white/10 text-slate-400'
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm shrink-0 shadow-md ${
+                          optionLetterBadges[option.id]
                         }`}
                       >
                         {option.id}
                       </span>
-                      <span className="flex-1 pt-0.5 leading-relaxed">{option.text}</span>
+                      <span className="flex-1 pt-1 leading-relaxed font-semibold">{option.text}</span>
 
                       {isSelected && (
-                        <CheckCircle2 className="w-5 h-5 text-amber-300 shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-6 h-6 text-pink-400 shrink-0 mt-0.5" />
                       )}
                     </button>
                   );
@@ -280,35 +285,35 @@ export function ActiveQuizScreen({
 
             {/* Answer Recorded Notification & Advance Control */}
             {isAnswered && (
-              <div className="mt-6 pt-5 border-t border-white/5 animate-fadeIn">
-                <div className="p-3.5 rounded-2xl border bg-slate-950/60 border-white/5 text-slate-300 flex items-center justify-between mb-4">
+              <div className="mt-6 pt-5 border-t border-white/10 animate-fadeIn">
+                <div className="p-3.5 rounded-2xl border-2 border-emerald-500/30 bg-emerald-950/40 text-emerald-200 flex items-center justify-between mb-4 shadow-sm">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                    <span className="text-xs font-medium">
-                      Response recorded for Phase {questionIndex + 1}
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    <span className="text-sm font-bold">
+                      Answer saved for Question {questionIndex + 1}!
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Locked</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Locked In</span>
                 </div>
 
-                {/* Manual Advance / Submit Button */}
+                {/* Saturated Solid / Gradient Button */}
                 <button
                   onClick={() => advanceNextQuestion()}
-                  className={`w-full py-3.5 px-5 rounded-2xl font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all ${
+                  className={`w-full py-4 px-6 rounded-2xl font-black text-base flex items-center justify-center gap-2 cursor-pointer shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 ${
                     isLastQuestion
-                      ? 'bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 shadow-teal-500/25'
-                      : 'bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 hover:from-amber-200 hover:to-amber-400 text-slate-950 shadow-amber-500/25'
+                      ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 text-slate-950 shadow-emerald-500/30'
+                      : 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white shadow-pink-500/30'
                   }`}
                 >
                   {isLastQuestion ? (
                     <>
-                      <Send className="w-4 h-4" />
-                      <span>Submit All 10 Responses</span>
+                      <Send className="w-5 h-5" />
+                      <span>Submit All 10 Answers</span>
                     </>
                   ) : (
                     <>
-                      <span>Next Phase</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <span>Next Question</span>
+                      <ArrowRight className="w-5 h-5" />
                     </>
                   )}
                 </button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Shield, Users, Globe } from 'lucide-react';
+import { Volume2, VolumeX, Shield, Users, Globe, Sparkles } from 'lucide-react';
 import { isSoundEnabled, toggleSound, playClickSound } from '../utils/sound';
 import { QuizStatus } from '../types/quiz';
 import { isSupabaseConfigured } from '../services/supabaseClient';
@@ -33,29 +33,29 @@ export function Header({
     switch (quizStatus) {
       case 'active':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            LIVE SESSION
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30">
+            <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+            LIVE QUIZ
           </span>
         );
       case 'ended':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/20">
-            CONCLUDED
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white shadow-md shadow-purple-600/30">
+            FINISHED
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono tracking-wider bg-amber-400/10 text-amber-300 border border-amber-400/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            LOBBY READY
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 shadow-md shadow-amber-400/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />
+            LOBBY
           </span>
         );
     }
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-panel border-b border-white/5">
+    <header className="sticky top-0 z-50 w-full glass-panel border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Brand / Logo */}
         <div
@@ -65,16 +65,14 @@ export function Header({
           }}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          {/* Minimalist Geometric Monogram */}
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-300 via-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/15 group-hover:scale-105 transition-transform">
-            <div className="w-4 h-4 border-2 border-slate-950 rotate-45 flex items-center justify-center">
-              <div className="w-1.5 h-1.5 bg-slate-950 rounded-full" />
-            </div>
+          {/* Juicy Gradient Rounded Logo Icon */}
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-pink-500/30 group-hover:scale-105 group-hover:rotate-3 transition-transform">
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="text-lg font-extrabold tracking-tight font-display text-white group-hover:text-amber-200 transition-colors">
-                SYNAPSE <span className="text-amber-400 text-sm font-mono tracking-normal">3D</span>
+              <span className="text-xl font-black tracking-tight font-display text-white group-hover:text-pink-300 transition-colors">
+                SYNAPSE <span className="gradient-text-fun font-mono text-sm uppercase">3D</span>
               </span>
               {getStatusBadge()}
             </div>
@@ -88,21 +86,21 @@ export function Header({
             title={
               isSupabaseConfigured
                 ? 'Cloud Production Mode (Supabase Realtime)'
-                : 'Local Tab Sync (BroadcastChannel + LocalStorage)'
+                : 'Direct Tab Sync (BroadcastChannel + LocalStorage)'
             }
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono bg-slate-900/60 border border-white/5 text-slate-400"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-950/80 border border-indigo-500/30 text-indigo-200"
           >
-            <Globe className={`w-3.5 h-3.5 ${isSupabaseConfigured ? 'text-teal-400' : 'text-amber-400'}`} />
-            <span>{isSupabaseConfigured ? 'Supabase Sync' : 'Direct Sync'}</span>
+            <Globe className={`w-3.5 h-3.5 ${isSupabaseConfigured ? 'text-teal-400' : 'text-pink-400'}`} />
+            <span>{isSupabaseConfigured ? 'Cloud Sync' : 'Tab Sync'}</span>
           </div>
 
           {/* Sound Synthesizer Toggle */}
           <button
             onClick={handleSoundToggle}
             aria-label={soundOn ? 'Mute sound' : 'Unmute sound'}
-            className="p-2 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-white/5 text-slate-400 hover:text-amber-300 transition-all cursor-pointer"
+            className="p-2.5 rounded-2xl bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/25 text-white hover:text-pink-300 transition-all cursor-pointer shadow-sm"
           >
-            {soundOn ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-600" />}
+            {soundOn ? <Volume2 className="w-4 h-4 text-pink-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
           </button>
 
           {/* View Switcher: Participant vs Host Admin */}
@@ -112,9 +110,9 @@ export function Header({
                 playClickSound();
                 onNavigate('admin');
               }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-xs font-semibold text-slate-300 hover:text-amber-300 transition-all cursor-pointer hover:border-amber-400/30"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-600/25 transform hover:-translate-y-0.5 active:translate-y-0"
             >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
+              <Shield className="w-3.5 h-3.5 text-amber-300" />
               <span>Host Console</span>
             </button>
           ) : (
@@ -123,10 +121,10 @@ export function Header({
                 playClickSound();
                 onNavigate('participant');
               }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 text-xs font-semibold text-amber-300 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-pink-500/25 transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <Users className="w-3.5 h-3.5" />
-              <span>Participant View</span>
+              <span>Player View</span>
             </button>
           )}
         </div>

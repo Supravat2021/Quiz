@@ -45,29 +45,29 @@ export function QuestionCanvas({ questionIndex }: QuestionCanvasProps) {
   };
 
   return (
-    <div className="w-full h-full relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] rounded-3xl overflow-hidden glass-panel border border-white/10 shadow-2xl flex items-center justify-center group">
-      {/* Aesthetic Top Tag */}
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/80 border border-white/10 backdrop-blur-md shadow-lg">
-        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-        <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase font-semibold">
-          3D SIMULATION • PHASE 0{questionIndex + 1}
+    <div className="w-full h-full relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] rounded-3xl overflow-hidden glass-panel border-2 border-indigo-500/25 shadow-2xl flex items-center justify-center group">
+      {/* Saturated Stage Indicator Pill */}
+      <div className="absolute top-4 left-4 z-10 flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-950/80 border border-pink-500/40 backdrop-blur-md shadow-lg">
+        <span className="w-2 h-2 rounded-full bg-pink-500 animate-ping" />
+        <span className="text-xs font-mono tracking-wider text-pink-300 uppercase font-bold">
+          3D SIMULATION • QUESTION 0{questionIndex + 1}
         </span>
       </div>
 
-      {/* Aesthetic Bottom Hint */}
-      <div className="absolute bottom-4 right-4 z-10 px-3 py-1 rounded-lg bg-slate-950/60 border border-white/5 backdrop-blur-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-        <span className="text-[10px] font-mono text-slate-400">Drag to orbit 3D model</span>
+      {/* Orbit Tip */}
+      <div className="absolute bottom-4 right-4 z-10 px-3 py-1 rounded-full bg-slate-950/70 border border-white/10 backdrop-blur-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[11px] font-mono text-indigo-300">Drag to rotate in 3D</span>
       </div>
 
-      {/* Subtle Vignette Overlay */}
-      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-radial-gradient from-transparent via-transparent to-black/40 z-[5]" />
+      {/* Subtle Color Vignette */}
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-radial-gradient from-transparent via-transparent to-slate-950/40 z-[5]" />
 
       <Canvas
         camera={{ position: [0, 0, 4.4], fov: 48 }}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
-        <color attach="background" args={['#070b18']} />
-        <fog attach="fog" args={['#070b18', 3.8, 9.5]} />
+        <color attach="background" args={['#140d30']} />
+        <fog attach="fog" args={['#140d30', 3.8, 9.8]} />
 
         <Suspense fallback={null}>
           {renderScene()}
@@ -78,7 +78,7 @@ export function QuestionCanvas({ questionIndex }: QuestionCanvasProps) {
           enablePan={false}
           maxPolarAngle={Math.PI / 1.75}
           minPolarAngle={Math.PI / 2.25}
-          rotateSpeed={0.4}
+          rotateSpeed={0.5}
           dampingFactor={0.05}
         />
       </Canvas>
