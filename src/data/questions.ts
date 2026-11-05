@@ -142,3 +142,4 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
       'Modern Face ID relies on deep convolutional and transformer neural networks combined with infrared dot projection to securely model 3D facial topology in real time.',
   },
 ];
+

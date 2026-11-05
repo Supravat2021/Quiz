@@ -120,3 +120,4 @@ export function SceneQ6SlopFilter() {
     </group>
   );
 }
+

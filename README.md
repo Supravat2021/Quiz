@@ -38,8 +38,9 @@ Powered by **React**, **Three.js**, **@react-three/fiber**, **@react-three/drei*
 
 4. **Host Admin Portal (`/admin`)**:
    - Protected by frontend PIN: `2026`.
-   - Live controls: "Start Quiz for Everyone", "Reset / Clear Session", "Simulate Competitors".
-   - Real-time participant tracker table sorted highest score to lowest.
+   - Live controls: "Start Quiz for Everyone", "Confirm & Publish Results to Everyone", "Reset / Clear Session", "Simulate Competitors".
+   - **Post-Submission Results Hold**: Scores and correct answers remain hidden from participants during the quiz until all answers are submitted and the host clicks **"Confirm & Publish Results to Everyone"**.
+   - Real-time participant tracker table sorted highest score to lowest with live submission status indicators (`10/10 Submitted ✓`).
    - One-click "Export Leaderboard to CSV".
 
 ---
@@ -77,6 +78,7 @@ CREATE TABLE IF NOT EXISTS public.quiz_sessions (
   id TEXT PRIMARY KEY,
   status TEXT NOT NULL DEFAULT 'waiting', -- 'waiting' | 'active' | 'ended'
   current_question_index INTEGER NOT NULL DEFAULT 0,
+  results_published BOOLEAN NOT NULL DEFAULT FALSE,
   started_at BIGINT,
   ended_at BIGINT,
   reset_count INTEGER NOT NULL DEFAULT 0,
@@ -90,6 +92,7 @@ CREATE TABLE IF NOT EXISTS public.quiz_participants (
   score INTEGER NOT NULL DEFAULT 0,
   current_question_index INTEGER NOT NULL DEFAULT 0,
   answers JSONB DEFAULT '{}'::jsonb,
+  submitted BOOLEAN NOT NULL DEFAULT FALSE,
   completed BOOLEAN NOT NULL DEFAULT FALSE,
   joined_at BIGINT NOT NULL,
   last_active_at BIGINT NOT NULL,
@@ -162,3 +165,4 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 - **Celebration**: `canvas-confetti`
 - **Audio**: Web Audio API Procedural Synthesizer (Zero asset loading lag)
 - **State & Real-Time**: Dual-Mode (`BroadcastChannel` + `localStorage` + Polling + Supabase Realtime)
+

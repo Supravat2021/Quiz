@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { Clock, Zap, CheckCircle2, XCircle, ArrowRight, Sparkles, Award } from 'lucide-react';
+import { Clock, CheckCircle2, ArrowRight, Sparkles, Send } from 'lucide-react';
 import { QuizQuestion, Participant, ParticipantAnswer } from '../types/quiz';
 import { QUIZ_QUESTIONS } from '../data/questions';
 import { QuestionCanvas } from './3d/QuestionCanvas';
-import { playClickSound, playCorrectSound, playWrongSound } from '../utils/sound';
+import { playClickSound } from '../utils/sound';
 
 interface ActiveQuizScreenProps {
   currentParticipant: Participant;
   onUpdateParticipant: (participant: Participant) => void;
-  onFinishQuiz: () => void;
+  onSubmitQuiz: (participant: Participant) => void;
 }
 
 const SECONDS_PER_QUESTION = 20;
@@ -16,7 +16,7 @@ const SECONDS_PER_QUESTION = 20;
 export function ActiveQuizScreen({
   currentParticipant,
   onUpdateParticipant,
-  onFinishQuiz,
+  onSubmitQuiz,
 }: ActiveQuizScreenProps) {
   const [questionIndex, setQuestionIndex] = useState(
     currentParticipant.currentQuestionIndex || 0
@@ -31,12 +31,19 @@ export function ActiveQuizScreen({
   const currentQuestion: QuizQuestion = QUIZ_QUESTIONS[questionIndex] || QUIZ_QUESTIONS[0];
   const isLastQuestion = questionIndex === QUIZ_QUESTIONS.length - 1;
 
-  // Initialize timer for each question
+  // Restore previously chosen answer if navigating
   useEffect(() => {
+    const existing = currentParticipant.answers?.[currentQuestion.id];
+    if (existing) {
+      setSelectedOption(existing.selectedOption);
+      setIsAnswered(true);
+    } else {
+      setSelectedOption(null);
+      setIsAnswered(false);
+    }
+
     setTimeLeft(SECONDS_PER_QUESTION);
     setQuestionStartTime(Date.now());
-    setSelectedOption(null);
-    setIsAnswered(false);
 
     if (timerRef.current) clearInterval(timerRef.current);
     if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
@@ -61,14 +68,14 @@ export function ActiveQuizScreen({
   const handleTimeExpired = () => {
     if (isAnswered) return;
     setIsAnswered(true);
-    playWrongSound();
 
+    const isCorrect = 'A' === currentQuestion.correct;
     const answerRecord: ParticipantAnswer = {
       questionId: currentQuestion.id,
-      selectedOption: 'A', // default timeout
-      isCorrect: false,
+      selectedOption: 'A', // default timeout option
+      isCorrect,
       timeTakenMs: SECONDS_PER_QUESTION * 1000,
-      pointsEarned: 0,
+      pointsEarned: isCorrect ? 100 : 0,
     };
 
     const updatedAnswers = {
@@ -90,17 +97,12 @@ export function ActiveQuizScreen({
     setIsAnswered(true);
     setSelectedOption(optionId);
 
+    // Compute points and correctness silently in background without revealing to participant
     const isCorrect = optionId === currentQuestion.correct;
     const timeTakenMs = Date.now() - questionStartTime;
     const remainingFraction = Math.max(0, timeLeft / SECONDS_PER_QUESTION);
     const speedBonus = isCorrect ? Math.round(remainingFraction * 50) : 0;
     const pointsEarned = isCorrect ? 100 + speedBonus : 0;
-
-    if (isCorrect) {
-      playCorrectSound();
-    } else {
-      playWrongSound();
-    }
 
     const answerRecord: ParticipantAnswer = {
       questionId: currentQuestion.id,
@@ -110,36 +112,41 @@ export function ActiveQuizScreen({
       pointsEarned,
     };
 
-    const newScore = (currentParticipant.score || 0) + pointsEarned;
-    const updatedAnswers = {
-      ...currentParticipant.answers,
-      [currentQuestion.id]: answerRecord,
-    };
+    // Calculate cumulative score silently
+    const previousAnswers = { ...currentParticipant.answers, [currentQuestion.id]: answerRecord };
+    const calculatedTotalScore = Object.values(previousAnswers).reduce(
+      (sum, a) => sum + (a.pointsEarned || 0),
+      0
+    );
 
     const updatedParticipant: Participant = {
       ...currentParticipant,
-      score: newScore,
+      score: calculatedTotalScore,
       currentQuestionIndex: questionIndex,
-      answers: updatedAnswers,
+      answers: previousAnswers,
     };
 
     onUpdateParticipant(updatedParticipant);
 
-    // Auto-advance after 2.8 seconds
-    autoAdvanceTimeoutRef.current = window.setTimeout(() => {
-      advanceNextQuestion(updatedParticipant);
-    }, 2800);
+    // Smooth auto-advance after 1.2s if not last question
+    if (!isLastQuestion) {
+      autoAdvanceTimeoutRef.current = window.setTimeout(() => {
+        advanceNextQuestion(updatedParticipant);
+      }, 1200);
+    }
   };
 
   const advanceNextQuestion = (participantState = currentParticipant) => {
     if (autoAdvanceTimeoutRef.current) clearTimeout(autoAdvanceTimeoutRef.current);
 
     if (isLastQuestion) {
-      onUpdateParticipant({
+      // Last question submitted
+      const submittedState: Participant = {
         ...participantState,
-        completed: true,
-      });
-      onFinishQuiz();
+        submitted: true,
+        completed: false, // will become completed when admin confirms & publishes
+      };
+      onSubmitQuiz(submittedState);
     } else {
       const nextIndex = questionIndex + 1;
       setQuestionIndex(nextIndex);
@@ -150,11 +157,12 @@ export function ActiveQuizScreen({
     }
   };
 
+  const answeredCount = Object.keys(currentParticipant.answers || {}).length;
   const progressPercentage = ((questionIndex + 1) / QUIZ_QUESTIONS.length) * 100;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-      {/* Top Header Bar: Progress & Score */}
+      {/* Top Header Bar: Progress & Confidentiality Notice */}
       <div className="mb-4 sm:mb-6 glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 border border-slate-800">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center font-mono font-bold text-amber-400">
@@ -172,14 +180,12 @@ export function ActiveQuizScreen({
           </div>
         </div>
 
-        {/* Live Score Counter */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700">
-            <Award className="w-4 h-4 text-amber-400" />
-            <span className="text-xs text-slate-400">Score:</span>
-            <span className="font-mono font-bold text-amber-300 text-sm">
-              {currentParticipant.score || 0} pts
-            </span>
+        {/* Status Indicators */}
+        <div className="flex items-center gap-3">
+          {/* Answered Counter badge */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-300">
+            <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+            <span>Answered: <strong className="text-cyan-300 font-mono">{answeredCount} of 10</strong></span>
           </div>
 
           {/* Timer Countdown Badge */}
@@ -216,9 +222,15 @@ export function ActiveQuizScreen({
           <div className="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl flex-1 flex flex-col justify-between">
             {/* Question Text */}
             <div>
-              <span className="inline-block px-3 py-1 rounded-lg text-xs font-mono font-medium text-cyan-300 bg-cyan-950/60 border border-cyan-800/50 mb-3">
-                {currentQuestion.topic}
-              </span>
+              <div className="flex items-center justify-between mb-3">
+                <span className="inline-block px-3 py-1 rounded-lg text-xs font-mono font-medium text-cyan-300 bg-cyan-950/60 border border-cyan-800/50">
+                  {currentQuestion.topic}
+                </span>
+                <span className="text-[11px] font-mono text-slate-400">
+                  Score revealed after submission & host confirmation
+                </span>
+              </div>
+
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 leading-snug">
                 {currentQuestion.text}
               </h2>
@@ -227,21 +239,16 @@ export function ActiveQuizScreen({
               <div className="space-y-3">
                 {currentQuestion.options.map((option) => {
                   const isSelected = selectedOption === option.id;
-                  const isCorrect = option.id === currentQuestion.correct;
 
+                  // Clean, neutral selected state (DO NOT reveal correct/incorrect during the quiz)
                   let buttonStyles =
                     'bg-slate-900/80 hover:bg-slate-800 border-slate-800 text-slate-200 hover:border-slate-700 hover:text-white';
 
-                  if (isAnswered) {
-                    if (isCorrect) {
-                      buttonStyles =
-                        'bg-emerald-500/20 border-emerald-500 text-emerald-200 shadow-lg shadow-emerald-500/20';
-                    } else if (isSelected && !isCorrect) {
-                      buttonStyles =
-                        'bg-red-500/20 border-red-500 text-red-200 shadow-lg shadow-red-500/20';
-                    } else {
-                      buttonStyles = 'bg-slate-900/40 border-slate-800/40 text-slate-500 opacity-60';
-                    }
+                  if (isSelected) {
+                    buttonStyles =
+                      'bg-amber-400/20 border-amber-400 text-amber-200 shadow-lg shadow-amber-500/20 font-bold';
+                  } else if (isAnswered) {
+                    buttonStyles = 'bg-slate-900/40 border-slate-800/40 text-slate-500 opacity-70';
                   }
 
                   return (
@@ -256,12 +263,8 @@ export function ActiveQuizScreen({
                     >
                       <span
                         className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-colors ${
-                          isAnswered && isCorrect
-                            ? 'bg-emerald-500 text-slate-950'
-                            : isAnswered && isSelected && !isCorrect
-                            ? 'bg-red-500 text-white'
-                            : isSelected
-                            ? 'bg-amber-400 text-slate-950'
+                          isSelected
+                            ? 'bg-amber-400 text-slate-950 font-extrabold'
                             : 'bg-slate-800 text-slate-300'
                         }`}
                       >
@@ -269,12 +272,8 @@ export function ActiveQuizScreen({
                       </span>
                       <span className="flex-1 pt-0.5">{option.text}</span>
 
-                      {/* Result Icons */}
-                      {isAnswered && isCorrect && (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                      )}
-                      {isAnswered && isSelected && !isCorrect && (
-                        <XCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                      {isSelected && (
+                        <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                       )}
                     </button>
                   );
@@ -282,41 +281,39 @@ export function ActiveQuizScreen({
               </div>
             </div>
 
-            {/* Answer Feedback & Explanation Box */}
+            {/* Answer Recorded Notification & Advance Control */}
             {isAnswered && (
               <div className="mt-6 pt-5 border-t border-slate-800 animate-fadeIn">
-                <div
-                  className={`p-4 rounded-xl border mb-4 ${
-                    selectedOption === currentQuestion.correct
-                      ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-200'
-                      : 'bg-amber-950/40 border-amber-800/60 text-amber-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1.5 font-bold text-sm">
-                    {selectedOption === currentQuestion.correct ? (
-                      <>
-                        <Zap className="w-4 h-4 text-emerald-400" />
-                        <span>Correct! (+100 pts + speed bonus)</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span>Concept Insight:</span>
-                      </>
-                    )}
+                <div className="p-3.5 rounded-xl border bg-slate-900/90 border-slate-700 text-slate-200 flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs sm:text-sm font-semibold">
+                      Answer saved for Question {questionIndex + 1}
+                    </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    {currentQuestion.explanation}
-                  </p>
+                  <span className="text-[11px] text-slate-400 font-mono">Locked</span>
                 </div>
 
-                {/* Manual Next Button */}
+                {/* Manual Advance / Submit Button */}
                 <button
                   onClick={() => advanceNextQuestion()}
-                  className="w-full py-3 px-5 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-amber-500/20"
+                  className={`w-full py-3.5 px-5 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all ${
+                    isLastQuestion
+                      ? 'bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-slate-950 shadow-emerald-500/25'
+                      : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow-amber-500/20'
+                  }`}
                 >
-                  <span>{isLastQuestion ? 'View Results & Leaderboard' : 'Next Question'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  {isLastQuestion ? (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Submit All 10 Answers</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Next Question</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </div>
             )}

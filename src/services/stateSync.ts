@@ -10,6 +10,7 @@ export const defaultSession: QuizSession = {
   id: 'main-quiz-session',
   status: 'waiting',
   currentQuestionIndex: 0,
+  resultsPublished: false,
   startedAt: null,
   endedAt: null,
   updatedAt: Date.now(),
@@ -118,8 +119,33 @@ export function startQuizSession(): QuizSession {
     ...current,
     status: 'active',
     currentQuestionIndex: 0,
+    resultsPublished: false,
     startedAt: Date.now(),
     endedAt: null,
+    updatedAt: Date.now(),
+  };
+  persistSession(updated);
+  return updated;
+}
+
+export function publishResultsSession(): QuizSession {
+  const current = getStoredSession();
+  const updated: QuizSession = {
+    ...current,
+    resultsPublished: true,
+    status: 'ended',
+    endedAt: current.endedAt || Date.now(),
+    updatedAt: Date.now(),
+  };
+  persistSession(updated);
+  return updated;
+}
+
+export function unpublishResultsSession(): QuizSession {
+  const current = getStoredSession();
+  const updated: QuizSession = {
+    ...current,
+    resultsPublished: false,
     updatedAt: Date.now(),
   };
   persistSession(updated);
@@ -130,6 +156,7 @@ export function resetQuizSession(): QuizSession {
   const current = getStoredSession();
   const resetSessionState: QuizSession = {
     ...defaultSession,
+    resultsPublished: false,
     resetCount: (current.resetCount || 0) + 1,
     updatedAt: Date.now(),
   };
@@ -182,6 +209,7 @@ export function addDemoParticipants(): void {
       name: 'Ada Lovelace',
       score: 1180,
       currentQuestionIndex: 9,
+      submitted: true,
       completed: true,
       joinedAt: Date.now() - 360000,
       lastActiveAt: Date.now(),
@@ -192,6 +220,7 @@ export function addDemoParticipants(): void {
       name: 'Alan Turing',
       score: 1140,
       currentQuestionIndex: 9,
+      submitted: true,
       completed: true,
       joinedAt: Date.now() - 320000,
       lastActiveAt: Date.now(),
@@ -202,6 +231,7 @@ export function addDemoParticipants(): void {
       name: 'Geoffrey Hinton',
       score: 1020,
       currentQuestionIndex: 8,
+      submitted: true,
       completed: false,
       joinedAt: Date.now() - 250000,
       lastActiveAt: Date.now(),
@@ -212,6 +242,7 @@ export function addDemoParticipants(): void {
       name: 'Fei-Fei Li',
       score: 980,
       currentQuestionIndex: 7,
+      submitted: false,
       completed: false,
       joinedAt: Date.now() - 200000,
       lastActiveAt: Date.now(),
@@ -222,6 +253,7 @@ export function addDemoParticipants(): void {
       name: 'Demis Hassabis',
       score: 950,
       currentQuestionIndex: 6,
+      submitted: false,
       completed: false,
       joinedAt: Date.now() - 150000,
       lastActiveAt: Date.now(),

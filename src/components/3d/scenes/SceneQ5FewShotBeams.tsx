@@ -121,3 +121,4 @@ export function SceneQ5FewShotBeams() {
     </group>
   );
 }
+

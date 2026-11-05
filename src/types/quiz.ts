@@ -19,6 +19,7 @@ export interface QuizSession {
   id: string;
   status: QuizStatus;
   currentQuestionIndex: number;
+  resultsPublished: boolean;
   startedAt: number | null;
   endedAt: number | null;
   updatedAt: number;
@@ -39,6 +40,7 @@ export interface Participant {
   score: number;
   currentQuestionIndex: number;
   answers: Record<number, ParticipantAnswer>;
+  submitted: boolean;
   completed: boolean;
   joinedAt: number;
   lastActiveAt: number;

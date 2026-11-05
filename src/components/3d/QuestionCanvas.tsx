@@ -77,3 +77,4 @@ export function QuestionCanvas({ questionIndex }: QuestionCanvasProps) {
     </div>
   );
 }
+

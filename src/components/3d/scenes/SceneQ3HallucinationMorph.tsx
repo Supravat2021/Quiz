@@ -115,3 +115,4 @@ export function SceneQ3HallucinationMorph() {
     </group>
   );
 }
+

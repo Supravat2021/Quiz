@@ -125,3 +125,4 @@ export function SceneQ4StrictExaminer() {
     </group>
   );
 }
+

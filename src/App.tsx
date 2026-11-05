@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { LobbyScreen } from './components/LobbyScreen';
 import { ActiveQuizScreen } from './components/ActiveQuizScreen';
+import { WaitingForResultsScreen } from './components/WaitingForResultsScreen';
 import { CompletionScreen } from './components/CompletionScreen';
 import { AdminPortal } from './components/AdminPortal';
 import { Participant, QuizSession } from './types/quiz';
@@ -9,6 +10,8 @@ import {
   defaultSession,
   subscribeToQuizState,
   startQuizSession,
+  publishResultsSession,
+  unpublishResultsSession,
   resetQuizSession,
   upsertParticipant,
   removeParticipant,
@@ -35,7 +38,8 @@ export function App() {
   const [session, setSession] = useState<QuizSession>(getStoredSession());
   const [participants, setParticipants] = useState<Participant[]>(getStoredParticipants());
   const [myParticipant, setMyParticipant] = useState<Participant | null>(null);
-  const [soloBypass, setSoloBypass] = useState(false);
+  const [soloBypassStart, setSoloBypassStart] = useState(false);
+  const [soloBypassResults, setSoloBypassResults] = useState(false);
   const [lastResetCount, setLastResetCount] = useState<number>(session.resetCount || 0);
 
   // Sync route changes with URL
@@ -47,7 +51,7 @@ export function App() {
     }
   };
 
-  // Listen to popstate for back/forward navigation
+  // Listen to popstate for browser back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.toLowerCase();
@@ -87,7 +91,8 @@ export function App() {
   useEffect(() => {
     if (session.resetCount !== undefined && session.resetCount > lastResetCount) {
       setLastResetCount(session.resetCount);
-      setSoloBypass(false);
+      setSoloBypassStart(false);
+      setSoloBypassResults(false);
       // Reset local participant answers if needed
       if (myParticipant) {
         const fresh: Participant = {
@@ -95,6 +100,7 @@ export function App() {
           score: 0,
           currentQuestionIndex: 0,
           answers: {},
+          submitted: false,
           completed: false,
         };
         setMyParticipant(fresh);
@@ -112,6 +118,7 @@ export function App() {
       score: 0,
       currentQuestionIndex: 0,
       answers: {},
+      submitted: false,
       completed: false,
       joinedAt: Date.now(),
       lastActiveAt: Date.now(),
@@ -128,13 +135,15 @@ export function App() {
     upsertParticipant(updated);
   };
 
-  // Finish quiz handler
-  const handleFinishQuiz = () => {
-    if (myParticipant) {
-      const finished = { ...myParticipant, completed: true };
-      setMyParticipant(finished);
-      upsertParticipant(finished);
-    }
+  // Participant submits all 10 answers
+  const handleSubmitQuiz = (submittedParticipant: Participant) => {
+    const updated: Participant = {
+      ...submittedParticipant,
+      submitted: true,
+      completed: false,
+    };
+    setMyParticipant(updated);
+    upsertParticipant(updated);
   };
 
   // Play again handler
@@ -145,17 +154,20 @@ export function App() {
         score: 0,
         currentQuestionIndex: 0,
         answers: {},
+        submitted: false,
         completed: false,
       };
       setMyParticipant(restarted);
       upsertParticipant(restarted);
-      setSoloBypass(true);
+      setSoloBypassStart(true);
+      setSoloBypassResults(false);
     }
   };
 
   // Determine participant screen state
-  const isQuizLive = session.status === 'active' || soloBypass;
-  const isParticipantCompleted = myParticipant?.completed === true;
+  const isQuizLive = session.status === 'active' || soloBypassStart;
+  const hasSubmitted = myParticipant?.submitted === true || myParticipant?.completed === true;
+  const canViewResults = session.resultsPublished || soloBypassResults;
 
   return (
     <div className="min-h-screen bg-[#0b132b] text-slate-100 flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
@@ -176,6 +188,12 @@ export function App() {
             onStartQuiz={() => {
               startQuizSession();
             }}
+            onPublishResults={() => {
+              publishResultsSession();
+            }}
+            onUnpublishResults={() => {
+              unpublishResultsSession();
+            }}
             onResetSession={() => {
               resetQuizSession();
             }}
@@ -195,13 +213,20 @@ export function App() {
                 onJoin={handleJoinQuiz}
                 session={session}
                 participants={participants}
-                onBypassStart={() => setSoloBypass(true)}
+                onBypassStart={() => setSoloBypassStart(true)}
               />
-            ) : isParticipantCompleted ? (
+            ) : hasSubmitted && canViewResults ? (
               <CompletionScreen
                 currentParticipant={myParticipant}
                 participants={participants}
                 onPlayAgain={handlePlayAgain}
+              />
+            ) : hasSubmitted && !canViewResults ? (
+              <WaitingForResultsScreen
+                currentParticipant={myParticipant}
+                participants={participants}
+                session={session}
+                onSoloRevealResults={() => setSoloBypassResults(true)}
               />
             ) : !isQuizLive ? (
               <LobbyScreen
@@ -209,13 +234,13 @@ export function App() {
                 onJoin={handleJoinQuiz}
                 session={session}
                 participants={participants}
-                onBypassStart={() => setSoloBypass(true)}
+                onBypassStart={() => setSoloBypassStart(true)}
               />
             ) : (
               <ActiveQuizScreen
                 currentParticipant={myParticipant}
                 onUpdateParticipant={handleUpdateParticipant}
-                onFinishQuiz={handleFinishQuiz}
+                onSubmitQuiz={handleSubmitQuiz}
               />
             )}
           </>
@@ -229,4 +254,5 @@ export function App() {
     </div>
   );
 }
+
 export default App;

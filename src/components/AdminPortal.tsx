@@ -12,6 +12,9 @@ import {
   Bot,
   Trash2,
   Lock,
+  Eye,
+  EyeOff,
+  Award,
 } from 'lucide-react';
 import { QuizSession, Participant } from '../types/quiz';
 import { playClickSound } from '../utils/sound';
@@ -23,6 +26,8 @@ interface AdminPortalProps {
   onResetSession: () => void;
   onAddDemoParticipants: () => void;
   onRemoveParticipant: (id: string) => void;
+  onPublishResults: () => void;
+  onUnpublishResults: () => void;
 }
 
 const ADMIN_PIN = '2026';
@@ -34,6 +39,8 @@ export function AdminPortal({
   onResetSession,
   onAddDemoParticipants,
   onRemoveParticipant,
+  onPublishResults,
+  onUnpublishResults,
 }: AdminPortalProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
@@ -55,13 +62,13 @@ export function AdminPortal({
     const sorted = [...participants].sort((a, b) => (b.score || 0) - (a.score || 0));
 
     const csvRows = [
-      ['Rank', 'Participant Name', 'Score', 'Current Question', 'Completed', 'Joined Date'],
+      ['Rank', 'Participant Name', 'Score', 'Progress', 'Submitted', 'Joined Date'],
       ...sorted.map((p, index) => [
         index + 1,
         `"${p.name.replace(/"/g, '""')}"`,
         p.score || 0,
         `Q${(p.currentQuestionIndex || 0) + 1}/10`,
-        p.completed ? 'YES' : 'NO',
+        p.submitted || p.completed ? 'YES' : 'NO',
         new Date(p.joinedAt).toLocaleString(),
       ]),
     ];
@@ -78,6 +85,7 @@ export function AdminPortal({
 
   // Sort participants by score descending
   const sortedParticipants = [...participants].sort((a, b) => (b.score || 0) - (a.score || 0));
+  const submittedCount = participants.filter((p) => p.submitted || p.completed).length;
 
   // If not authenticated, show PIN login screen
   if (!isAuthenticated) {
@@ -90,7 +98,7 @@ export function AdminPortal({
 
           <h2 className="text-2xl font-extrabold text-center text-white mb-2">Host Admin Portal</h2>
           <p className="text-xs text-center text-slate-400 mb-6">
-            Enter the host PIN to control the live quiz session and track participants.
+            Enter the host PIN to control the live quiz session and confirm results.
           </p>
 
           <form onSubmit={handlePinSubmit} className="space-y-4">
@@ -154,11 +162,16 @@ export function AdminPortal({
             </div>
           </div>
 
-          {/* Status Badge */}
+          {/* Status Badges */}
           <div className="flex items-center gap-4">
             <div className="text-right">
               <span className="text-xs text-slate-400 block font-medium">Session Status</span>
-              {session.status === 'active' ? (
+              {session.resultsPublished ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  RESULTS PUBLISHED
+                </span>
+              ) : session.status === 'active' ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                   QUIZ LIVE
@@ -176,9 +189,9 @@ export function AdminPortal({
             </div>
 
             <div className="bg-slate-900/90 border border-slate-800 px-4 py-2 rounded-xl text-center">
-              <span className="text-[11px] text-slate-400 block">Participants</span>
+              <span className="text-[11px] text-slate-400 block">Submissions</span>
               <span className="text-xl font-bold font-mono text-cyan-400">
-                {participants.length}
+                {submittedCount}/{participants.length}
               </span>
             </div>
           </div>
@@ -193,9 +206,9 @@ export function AdminPortal({
                 playClickSound();
                 onStartQuiz();
               }}
-              disabled={session.status === 'active'}
+              disabled={session.status === 'active' && !session.resultsPublished}
               className={`px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all cursor-pointer shadow-lg ${
-                session.status === 'active'
+                session.status === 'active' && !session.resultsPublished
                   ? 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
                   : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 shadow-emerald-500/20'
               }`}
@@ -203,6 +216,31 @@ export function AdminPortal({
               <Play className="w-4 h-4 fill-current" />
               <span>Start Quiz for Everyone</span>
             </button>
+
+            {/* CONFIRM & PUBLISH RESULTS BUTTON */}
+            {!session.resultsPublished ? (
+              <button
+                onClick={() => {
+                  playClickSound();
+                  onPublishResults();
+                }}
+                className="px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <Award className="w-4 h-4" />
+                <span>Confirm & Publish Results to Everyone</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  playClickSound();
+                  onUnpublishResults();
+                }}
+                className="px-4 py-2.5 rounded-xl font-semibold text-sm bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/50 text-amber-300 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <EyeOff className="w-4 h-4" />
+                <span>Hide / Unpublish Results</span>
+              </button>
+            )}
 
             {/* Reset / Clear Session Button */}
             <button
@@ -252,10 +290,15 @@ export function AdminPortal({
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-amber-400" />
-            <h2 className="text-xl font-bold text-white">Live Participant Tracker</h2>
+            <div>
+              <h2 className="text-xl font-bold text-white">Live Participant Tracker</h2>
+              <p className="text-xs text-slate-400">
+                Host preview: scores and right answers remain hidden from players until you click "Confirm & Publish".
+              </p>
+            </div>
           </div>
           <span className="text-xs font-mono text-slate-400">
-            Auto-syncs via BroadcastChannel & LocalStorage / Supabase
+            {submittedCount} of {participants.length} Finished
           </span>
         </div>
 
@@ -275,14 +318,16 @@ export function AdminPortal({
                   <th className="py-3 px-3">Rank</th>
                   <th className="py-3 px-3">Participant</th>
                   <th className="py-3 px-3 text-center">Progress</th>
-                  <th className="py-3 px-3 text-right">Score</th>
-                  <th className="py-3 px-3 text-center">Status</th>
+                  <th className="py-3 px-3 text-right">Host Score Preview</th>
+                  <th className="py-3 px-3 text-center">Player Status</th>
                   <th className="py-3 px-3 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-medium">
                 {sortedParticipants.map((p, index) => {
                   const rank = index + 1;
+                  const isSubmitted = p.submitted || p.completed;
+
                   return (
                     <tr key={p.id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="py-3.5 px-3">
@@ -307,8 +352,10 @@ export function AdminPortal({
                         </span>
                       </td>
                       <td className="py-3.5 px-3 text-center font-mono text-xs">
-                        {p.completed ? (
-                          <span className="text-emerald-400 font-bold">10/10 Finished</span>
+                        {isSubmitted ? (
+                          <span className="inline-flex items-center gap-1 text-emerald-400 font-bold">
+                            <CheckCircle className="w-3.5 h-3.5" /> 10/10 Submitted
+                          </span>
                         ) : (
                           <span className="text-amber-300">
                             Q{(p.currentQuestionIndex || 0) + 1}/10
@@ -316,20 +363,24 @@ export function AdminPortal({
                         )}
                       </td>
                       <td className="py-3.5 px-3 text-right font-mono font-bold text-amber-400 text-base">
-                        {p.score || 0}
+                        {p.score || 0} pts
                       </td>
                       <td className="py-3.5 px-3 text-center">
-                        {p.completed ? (
+                        {session.resultsPublished ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400">
-                            <CheckCircle className="w-3 h-3" /> Done
+                            <Eye className="w-3 h-3" /> Released to Player
+                          </span>
+                        ) : isSubmitted ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-400">
+                            <Clock className="w-3 h-3" /> Waiting for Release
                           </span>
                         ) : session.status === 'active' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-400">
-                            <Clock className="w-3 h-3 animate-spin" /> In Progress
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-amber-300">
+                            Answering...
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">
-                            Waiting in Lobby
+                            In Lobby
                           </span>
                         )}
                       </td>
