@@ -247,9 +247,9 @@ export function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="py-4 border-t border-slate-900 text-center text-xs text-slate-500 font-mono">
-        <p>AI Quiz 3D • Next-Gen Interactive Web Application • Ready for Vercel Deployment</p>
+      {/* Minimalist Footer */}
+      <footer className="py-5 border-t border-white/5 text-center text-xs text-slate-500 font-mono">
+        <p className="tracking-wider">SYNAPSE 3D • The Architectural AI Odyssey • Vercel Production Ready</p>
       </footer>
     </div>
   );

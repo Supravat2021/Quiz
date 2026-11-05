@@ -11,110 +11,104 @@ export function SceneQ10FaceIDScan() {
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
-    // Subtle head tracking turn
     if (headGroupRef.current) {
-      headGroupRef.current.rotation.y = Math.sin(t * 0.8) * 0.25;
-      headGroupRef.current.rotation.x = Math.sin(t * 0.5) * 0.08;
+      headGroupRef.current.rotation.y = Math.sin(t * 0.6) * 0.2;
+      headGroupRef.current.rotation.x = Math.sin(t * 0.4) * 0.06;
     }
 
-    // Laser scan line sweeping smoothly up and down from y = -1.2 to y = 1.2
     if (scanLineRef.current) {
-      const scanY = Math.sin(t * 2.2) * 1.15;
+      const scanY = Math.sin(t * 1.8) * 1.05;
       scanLineRef.current.position.y = scanY;
     }
   });
 
   return (
     <group>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[0, 2, 3]} intensity={2.8} color="#06b6d4" />
-      <pointLight position={[0, -2, 2]} intensity={2} color="#fbbf24" />
+      <ambientLight intensity={0.45} />
+      <pointLight position={[0, 2, 3]} intensity={2.6} color="#2dd4bf" />
+      <pointLight position={[0, -2, 2]} intensity={1.8} color="#f5d061" />
 
-      <Sparkles count={40} scale={5} size={2.5} speed={0.5} color="#06b6d4" />
+      <Sparkles count={35} scale={5} size={2} speed={0.4} color="#2dd4bf" opacity={0.35} />
 
-      {/* Outer Smartphone Glass Frame */}
+      {/* Floating Dark Sapphire Smartphone Chassis */}
       <group ref={phoneFrameRef} position={[0, 0, -0.2]}>
-        {/* Phone chassis */}
         <mesh>
-          <boxGeometry args={[1.9, 3.2, 0.08]} />
+          <boxGeometry args={[1.8, 3.0, 0.06]} />
           <meshStandardMaterial
-            color="#0b132b"
-            roughness={0.1}
+            color="#070c1b"
+            roughness={0.15}
             metalness={0.9}
             transparent
-            opacity={0.3}
+            opacity={0.35}
           />
         </mesh>
-        {/* Phone perimeter outline */}
         <lineSegments>
-          <edgesGeometry args={[new THREE.BoxGeometry(1.9, 3.2, 0.08)]} />
+          <edgesGeometry args={[new THREE.BoxGeometry(1.8, 3.0, 0.06)]} />
           <lineBasicMaterial color="#38bdf8" />
         </lineSegments>
       </group>
 
-      {/* Procedural 3D Geometric Wireframe Face / Head Mask */}
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
+      {/* Stylized Low-Poly Geometric Biometric Mask */}
+      <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.25}>
         <group ref={headGroupRef} position={[0, 0, 0.1]}>
-          {/* Main Skull / Cranium (Icosahedron high-poly wireframe) */}
-          <mesh position={[0, 0.2, 0]}>
-            <icosahedronGeometry args={[0.7, 2]} />
+          {/* Cranium */}
+          <mesh position={[0, 0.18, 0]}>
+            <icosahedronGeometry args={[0.62, 2]} />
             <meshStandardMaterial
-              color="#06b6d4"
+              color="#0d9488"
+              emissive="#14b8a6"
+              emissiveIntensity={0.65}
+              wireframe
+            />
+          </mesh>
+
+          {/* Jaw / Chin structure */}
+          <mesh position={[0, -0.38, 0.12]}>
+            <coneGeometry args={[0.38, 0.52, 6]} />
+            <meshStandardMaterial
+              color="#38bdf8"
               emissive="#0284c7"
               emissiveIntensity={0.7}
               wireframe
             />
           </mesh>
 
-          {/* Chin / Jaw Geometry */}
-          <mesh position={[0, -0.45, 0.15]}>
-            <coneGeometry args={[0.42, 0.6, 6]} />
-            <meshStandardMaterial
-              color="#38bdf8"
-              emissive="#0369a1"
-              emissiveIntensity={0.8}
-              wireframe
-            />
+          {/* Biometric Eye Landmarks */}
+          <mesh position={[-0.22, 0.18, 0.52]}>
+            <sphereGeometry args={[0.045, 12, 12]} />
+            <meshStandardMaterial color="#f5d061" emissive="#f5d061" emissiveIntensity={2} />
+          </mesh>
+          <mesh position={[0.22, 0.18, 0.52]}>
+            <sphereGeometry args={[0.045, 12, 12]} />
+            <meshStandardMaterial color="#f5d061" emissive="#f5d061" emissiveIntensity={2} />
           </mesh>
 
-          {/* Eye landmarks (Key biometric recognition dots) */}
-          <mesh position={[-0.24, 0.22, 0.6]}>
-            <sphereGeometry args={[0.06, 12, 12]} />
-            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={2} />
-          </mesh>
-          <mesh position={[0.24, 0.22, 0.6]}>
-            <sphereGeometry args={[0.06, 12, 12]} />
-            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={2} />
+          {/* Biometric Nose Node */}
+          <mesh position={[0, 0.04, 0.6]}>
+            <octahedronGeometry args={[0.055, 0]} />
+            <meshStandardMaterial color="#2dd4bf" emissive="#2dd4bf" emissiveIntensity={1.8} />
           </mesh>
 
-          {/* Nose bridge landmark */}
-          <mesh position={[0, 0.05, 0.68]}>
-            <octahedronGeometry args={[0.07, 0]} />
-            <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={1.8} />
-          </mesh>
-
-          {/* Mouth landmark */}
-          <mesh position={[0, -0.22, 0.58]}>
-            <boxGeometry args={[0.22, 0.04, 0.04]} />
-            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={1.8} />
+          {/* Biometric Mouth Landmark */}
+          <mesh position={[0, -0.2, 0.52]}>
+            <boxGeometry args={[0.2, 0.03, 0.03]} />
+            <meshStandardMaterial color="#f5d061" emissive="#f5d061" emissiveIntensity={1.6} />
           </mesh>
         </group>
       </Float>
 
-      {/* Vertical Sweeping Laser Scan Line & Glow Plane */}
+      {/* Vertical Sweeping Coherent Laser Scan Line */}
       <group ref={scanLineRef}>
-        {/* Bright horizontal laser beam */}
-        <mesh position={[0, 0, 0.75]}>
-          <boxGeometry args={[1.8, 0.035, 0.02]} />
-          <meshBasicMaterial color="#06b6d4" />
+        <mesh position={[0, 0, 0.68]}>
+          <boxGeometry args={[1.7, 0.025, 0.015]} />
+          <meshBasicMaterial color="#2dd4bf" />
         </mesh>
-        {/* Laser glow fan */}
-        <mesh position={[0, 0, 0.72]}>
-          <planeGeometry args={[1.75, 0.18]} />
+        <mesh position={[0, 0, 0.66]}>
+          <planeGeometry args={[1.68, 0.14]} />
           <meshBasicMaterial
-            color="#06b6d4"
+            color="#2dd4bf"
             transparent
-            opacity={0.35}
+            opacity={0.28}
             side={THREE.DoubleSide}
           />
         </mesh>
@@ -122,4 +116,3 @@ export function SceneQ10FaceIDScan() {
     </group>
   );
 }
-
