@@ -53,7 +53,7 @@ export function AdminPortal({
       setPinError('');
       playClickSound();
     } else {
-      setPinError('Invalid Admin PIN. (Default: 2026)');
+      setPinError('Invalid Admin PIN.)');
     }
   };
 
@@ -205,11 +205,10 @@ export function AdminPortal({
                 onStartQuiz();
               }}
               disabled={session.status === 'active' && !session.resultsPublished}
-              className={`px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg ${
-                session.status === 'active' && !session.resultsPublished
+              className={`px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg ${session.status === 'active' && !session.resultsPublished
                   ? 'bg-slate-900 text-slate-600 cursor-not-allowed opacity-60'
                   : 'bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 shadow-emerald-500/30'
-              }`}
+                }`}
             >
               <Play className="w-4 h-4 fill-current" />
               <span>Launch Quiz for Everyone</span>
@@ -271,11 +270,10 @@ export function AdminPortal({
           <button
             onClick={handleExportCSV}
             disabled={participants.length === 0}
-            className={`px-4 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
-              participants.length === 0
+            className={`px-4 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${participants.length === 0
                 ? 'bg-slate-900/50 border border-white/5 text-slate-600 cursor-not-allowed'
                 : 'bg-amber-400/20 hover:bg-amber-400/30 border-2 border-amber-400/40 text-amber-300 cursor-pointer shadow-sm'
-            }`}
+              }`}
           >
             <Download className="w-4 h-4" />
             <span>Export CSV</span>
@@ -330,15 +328,14 @@ export function AdminPortal({
                     <tr key={p.id} className="hover:bg-slate-900/50 transition-colors">
                       <td className="py-3.5 px-3">
                         <span
-                          className={`w-7 h-7 rounded-xl inline-flex items-center justify-center font-bold text-xs ${
-                            rank === 1
+                          className={`w-7 h-7 rounded-xl inline-flex items-center justify-center font-bold text-xs ${rank === 1
                               ? 'bg-amber-400 text-slate-950 font-black shadow-md'
                               : rank === 2
-                              ? 'bg-slate-300 text-slate-950 font-black'
-                              : rank === 3
-                              ? 'bg-amber-700 text-white font-black'
-                              : 'bg-slate-900 text-slate-400'
-                          }`}
+                                ? 'bg-slate-300 text-slate-950 font-black'
+                                : rank === 3
+                                  ? 'bg-amber-700 text-white font-black'
+                                  : 'bg-slate-900 text-slate-400'
+                            }`}
                         >
                           {rank}
                         </span>
