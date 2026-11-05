@@ -7,105 +7,103 @@ export function SceneQ3HallucinationMorph() {
   const sphereRef = useRef<THREE.Mesh>(null);
   const ring1Ref = useRef<THREE.Mesh>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
-  const glitchGroupRef = useRef<THREE.Group>(null);
+  const shardsRef = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
     if (sphereRef.current) {
-      sphereRef.current.rotation.x = t * 0.4;
-      sphereRef.current.rotation.y = t * 0.6;
+      sphereRef.current.rotation.x = t * 0.3;
+      sphereRef.current.rotation.y = t * 0.45;
     }
 
-    // Glitching rings rotate and snap jitter
     if (ring1Ref.current) {
-      ring1Ref.current.rotation.x = t * 1.5;
-      ring1Ref.current.rotation.y = t * 0.8;
-      // Periodic subtle glitch offset
-      if (Math.sin(t * 12) > 0.85) {
-        ring1Ref.current.position.x = (Math.random() - 0.5) * 0.2;
+      ring1Ref.current.rotation.x = t * 0.9;
+      ring1Ref.current.rotation.y = t * 0.6;
+      // Subtle quantum phase jitter
+      if (Math.sin(t * 10) > 0.92) {
+        ring1Ref.current.position.x = (Math.random() - 0.5) * 0.12;
       } else {
         ring1Ref.current.position.x = 0;
       }
     }
 
     if (ring2Ref.current) {
-      ring2Ref.current.rotation.z = -t * 1.2;
-      ring2Ref.current.rotation.y = t * 1.1;
-      if (Math.cos(t * 15) > 0.9) {
-        ring2Ref.current.position.y = (Math.random() - 0.5) * 0.2;
+      ring2Ref.current.rotation.z = -t * 0.8;
+      ring2Ref.current.rotation.y = t * 0.7;
+      if (Math.cos(t * 12) > 0.94) {
+        ring2Ref.current.position.y = (Math.random() - 0.5) * 0.12;
       } else {
         ring2Ref.current.position.y = 0;
       }
     }
 
-    if (glitchGroupRef.current) {
-      // Shimmering micro-crystals
-      glitchGroupRef.current.rotation.y = t * 0.5;
+    if (shardsRef.current) {
+      shardsRef.current.rotation.y = t * 0.35;
     }
   });
 
   return (
     <group>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[3, 2, 4]} intensity={2.5} color="#ec4899" />
-      <pointLight position={[-3, -2, 2]} intensity={2.5} color="#06b6d4" />
+      <ambientLight intensity={0.45} />
+      <pointLight position={[3, 3, 3]} intensity={2.6} color="#c084fc" />
+      <pointLight position={[-3, -2, 2]} intensity={2.2} color="#2dd4bf" />
+      <pointLight position={[0, -3, -2]} intensity={1.8} color="#f5d061" />
 
-      <Sparkles count={50} scale={6} size={2.5} speed={0.8} color="#f43f5e" />
+      <Sparkles count={40} scale={6} size={2} speed={0.5} color="#c084fc" opacity={0.4} />
 
-      {/* Morphing Distorted Sphere */}
-      <Float speed={3} rotationIntensity={1.5} floatIntensity={1}>
+      {/* Morphing Pearlescent Liquid Mirage Orb */}
+      <Float speed={2} rotationIntensity={0.8} floatIntensity={0.6}>
         <mesh ref={sphereRef} position={[0, 0, 0]}>
-          <sphereGeometry args={[1, 64, 64]} />
+          <sphereGeometry args={[0.95, 64, 64]} />
           <MeshDistortMaterial
-            color="#06b6d4"
-            emissive="#ec4899"
-            emissiveIntensity={0.6}
-            distort={0.65}
-            speed={4}
-            roughness={0.2}
+            color="#2dd4bf"
+            emissive="#a855f7"
+            emissiveIntensity={0.65}
+            distort={0.42}
+            speed={2.8}
+            roughness={0.15}
             metalness={0.8}
-            wireframe={false}
           />
         </mesh>
       </Float>
 
-      {/* Outer Glitching Wireframe Ring 1 */}
+      {/* Outer Gyroscopic Wireframe Ring 1 */}
       <mesh ref={ring1Ref}>
-        <torusGeometry args={[1.5, 0.03, 16, 64]} />
+        <torusGeometry args={[1.5, 0.015, 16, 96]} />
         <meshStandardMaterial
-          color="#f43f5e"
-          emissive="#e11d48"
-          emissiveIntensity={2}
+          color="#c084fc"
+          emissive="#9333ea"
+          emissiveIntensity={1.5}
           wireframe
         />
       </mesh>
 
-      {/* Outer Glitching Wireframe Ring 2 */}
+      {/* Outer Gyroscopic Wireframe Ring 2 */}
       <mesh ref={ring2Ref}>
-        <torusGeometry args={[1.8, 0.02, 16, 64]} />
+        <torusGeometry args={[1.8, 0.012, 16, 96]} />
         <meshStandardMaterial
-          color="#fbbf24"
+          color="#f5d061"
           emissive="#d97706"
-          emissiveIntensity={1.8}
+          emissiveIntensity={1.4}
           wireframe
         />
       </mesh>
 
-      {/* Floating Illusion shards */}
-      <group ref={glitchGroupRef}>
+      {/* Floating Prismatic Shards */}
+      <group ref={shardsRef}>
         {[...Array(6)].map((_, i) => {
           const angle = (i * Math.PI * 2) / 6;
           return (
             <mesh
               key={i}
-              position={[Math.cos(angle) * 2.2, Math.sin(angle * 2) * 0.6, Math.sin(angle) * 2.2]}
+              position={[Math.cos(angle) * 2.2, Math.sin(angle * 2) * 0.5, Math.sin(angle) * 2.2]}
             >
-              <octahedronGeometry args={[0.2]} />
+              <octahedronGeometry args={[0.16]} />
               <meshStandardMaterial
-                color="#a855f7"
-                emissive="#9333ea"
-                emissiveIntensity={1.5}
+                color="#e879f9"
+                emissive="#c026d3"
+                emissiveIntensity={1.3}
                 wireframe
               />
             </mesh>
@@ -115,4 +113,3 @@ export function SceneQ3HallucinationMorph() {
     </group>
   );
 }
-

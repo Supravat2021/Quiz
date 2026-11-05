@@ -6,123 +6,122 @@ import * as THREE from 'three';
 export function SceneQ4StrictExaminer() {
   const capRef = useRef<THREE.Group>(null);
   const shieldRef = useRef<THREE.Group>(null);
-  const auraRef = useRef<THREE.Mesh>(null);
+  const haloRef = useRef<THREE.Mesh>(null);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
     if (capRef.current) {
-      capRef.current.rotation.y = t * 0.7;
-      capRef.current.rotation.z = Math.sin(t * 1.5) * 0.08;
+      capRef.current.rotation.y = t * 0.45;
+      capRef.current.rotation.z = Math.sin(t * 1.2) * 0.05;
     }
 
     if (shieldRef.current) {
-      shieldRef.current.rotation.y = -t * 0.5;
-      shieldRef.current.position.y = -0.5 + Math.sin(t * 2) * 0.1;
+      shieldRef.current.rotation.y = -t * 0.35;
+      shieldRef.current.position.y = -0.55 + Math.sin(t * 1.5) * 0.08;
     }
 
-    if (auraRef.current) {
-      auraRef.current.rotation.z = t * 0.4;
-      const s = 1 + Math.sin(t * 3) * 0.05;
-      auraRef.current.scale.set(s, s, s);
+    if (haloRef.current) {
+      haloRef.current.rotation.z = t * 0.25;
+      const s = 1 + Math.sin(t * 2) * 0.04;
+      haloRef.current.scale.set(s, s, s);
     }
   });
 
   return (
     <group>
-      <ambientLight intensity={0.6} />
-      <pointLight position={[2, 4, 3]} intensity={2.5} color="#fbbf24" />
-      <pointLight position={[-3, -1, 2]} intensity={2} color="#3b82f6" />
+      <ambientLight intensity={0.5} />
+      <pointLight position={[2, 3, 3]} intensity={2.4} color="#f5d061" />
+      <pointLight position={[-3, -1, 2]} intensity={1.8} color="#38bdf8" />
 
-      <Sparkles count={35} scale={5} size={2.5} speed={0.4} color="#fbbf24" />
+      <Sparkles count={30} scale={5} size={2} speed={0.3} color="#f5d061" opacity={0.35} />
 
-      {/* Floating Academic Mortarboard Cap */}
-      <Float speed={2} rotationIntensity={0.6} floatIntensity={0.8}>
-        <group ref={capRef} position={[0, 0.7, 0]}>
-          {/* Flat Diamond Top Board */}
-          <mesh rotation={[Math.PI / 8, Math.PI / 4, 0]}>
-            <boxGeometry args={[1.5, 0.06, 1.5]} />
+      {/* Floating Stately Academic Mortarboard */}
+      <Float speed={1.5} rotationIntensity={0.4} floatIntensity={0.5}>
+        <group ref={capRef} position={[0, 0.72, 0]}>
+          {/* Diamond Scholar Top Board */}
+          <mesh rotation={[Math.PI / 10, Math.PI / 4, 0]}>
+            <boxGeometry args={[1.4, 0.045, 1.4]} />
             <meshStandardMaterial
-              color="#1e1b4b"
-              emissive="#312e81"
-              emissiveIntensity={0.4}
-              roughness={0.3}
-              metalness={0.7}
+              color="#0a0f1d"
+              emissive="#1e293b"
+              emissiveIntensity={0.3}
+              roughness={0.2}
+              metalness={0.8}
             />
           </mesh>
 
-          {/* Golden Button on Top */}
-          <mesh position={[0, 0.1, 0]}>
-            <cylinderGeometry args={[0.08, 0.08, 0.05, 16]} />
-            <meshStandardMaterial color="#fbbf24" emissive="#d97706" emissiveIntensity={1.5} />
+          {/* Golden Center Cap Button */}
+          <mesh position={[0, 0.09, 0]}>
+            <cylinderGeometry args={[0.07, 0.07, 0.04, 16]} />
+            <meshStandardMaterial color="#f5d061" emissive="#d4a329" emissiveIntensity={1.4} />
           </mesh>
 
-          {/* Golden Tassel Cord and Pendant */}
-          <mesh position={[0.45, -0.2, 0.45]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.5, 8]} />
-            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={1.2} />
+          {/* Golden Tassel Filament & Pendant */}
+          <mesh position={[0.42, -0.18, 0.42]}>
+            <cylinderGeometry args={[0.015, 0.015, 0.45, 8]} />
+            <meshStandardMaterial color="#f5d061" emissive="#f5d061" emissiveIntensity={1.2} />
           </mesh>
-          <mesh position={[0.45, -0.48, 0.45]}>
-            <coneGeometry args={[0.08, 0.18, 12]} />
-            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={1.5} />
+          <mesh position={[0.42, -0.42, 0.42]}>
+            <coneGeometry args={[0.065, 0.15, 12]} />
+            <meshStandardMaterial color="#f5d061" emissive="#f5d061" emissiveIntensity={1.4} />
           </mesh>
 
           {/* Skull Cap Base */}
-          <mesh position={[0, -0.25, 0]}>
-            <cylinderGeometry args={[0.55, 0.45, 0.4, 24]} />
-            <meshStandardMaterial color="#1e1b4b" roughness={0.5} />
+          <mesh position={[0, -0.22, 0]}>
+            <cylinderGeometry args={[0.52, 0.42, 0.35, 24]} />
+            <meshStandardMaterial color="#0a0f1d" roughness={0.4} />
           </mesh>
         </group>
       </Float>
 
-      {/* Authoritative Clipboard / Shield */}
-      <Float speed={2.5} rotationIntensity={0.8} floatIntensity={0.5}>
-        <group ref={shieldRef} position={[0, -0.7, 0]}>
-          {/* Main Shield / Clipboard Body */}
+      {/* Authoritative Evaluation Shield */}
+      <Float speed={1.8} rotationIntensity={0.5} floatIntensity={0.4}>
+        <group ref={shieldRef} position={[0, -0.65, 0]}>
+          {/* Shield Chassis */}
           <mesh>
-            <boxGeometry args={[1.1, 1.4, 0.08]} />
+            <boxGeometry args={[1.05, 1.35, 0.06]} />
             <meshStandardMaterial
-              color="#0f172a"
+              color="#090d19"
               emissive="#1e3a8a"
-              emissiveIntensity={0.5}
-              roughness={0.2}
+              emissiveIntensity={0.4}
+              roughness={0.15}
               metalness={0.9}
             />
           </mesh>
 
-          {/* Glowing Golden Border Ring / Clamp */}
-          <mesh position={[0, 0.65, 0.06]}>
-            <boxGeometry args={[0.45, 0.12, 0.06]} />
+          {/* Golden Top Fastener / Clamp */}
+          <mesh position={[0, 0.62, 0.05]}>
+            <boxGeometry args={[0.42, 0.1, 0.05]} />
             <meshStandardMaterial
-              color="#fbbf24"
-              emissive="#fbbf24"
-              emissiveIntensity={1.8}
+              color="#f5d061"
+              emissive="#f5d061"
+              emissiveIntensity={1.6}
             />
           </mesh>
 
-          {/* Evaluation checkmark icon in center */}
-          <mesh position={[0, 0, 0.06]}>
-            <torusGeometry args={[0.3, 0.04, 16, 32]} />
+          {/* Fine Evaluation Seal */}
+          <mesh position={[0, 0, 0.05]}>
+            <torusGeometry args={[0.28, 0.025, 16, 32]} />
             <meshStandardMaterial
-              color="#06b6d4"
-              emissive="#06b6d4"
-              emissiveIntensity={2}
+              color="#2dd4bf"
+              emissive="#2dd4bf"
+              emissiveIntensity={1.8}
             />
           </mesh>
         </group>
       </Float>
 
-      {/* Authority Halo / Rotating Ring */}
-      <mesh ref={auraRef} position={[0, 0, -0.2]}>
-        <torusGeometry args={[1.8, 0.02, 16, 64]} />
+      {/* Subtle Authority Halo */}
+      <mesh ref={haloRef} position={[0, 0, -0.2]}>
+        <torusGeometry args={[1.75, 0.012, 16, 80]} />
         <meshStandardMaterial
-          color="#fbbf24"
-          emissive="#fbbf24"
-          emissiveIntensity={1.5}
+          color="#f5d061"
+          emissive="#f5d061"
+          emissiveIntensity={1.2}
           wireframe
         />
       </mesh>
     </group>
   );
 }
-

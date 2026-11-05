@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stars } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { SceneQ1NextToken } from './scenes/SceneQ1NextToken';
 import { SceneQ2FourCharsOneToken } from './scenes/SceneQ2FourCharsOneToken';
 import { SceneQ3HallucinationMorph } from './scenes/SceneQ3HallucinationMorph';
@@ -17,7 +17,6 @@ interface QuestionCanvasProps {
 }
 
 export function QuestionCanvas({ questionIndex }: QuestionCanvasProps) {
-  // Render the distinct 3D scene matching current question (0-indexed 0..9)
   const renderScene = () => {
     switch (questionIndex) {
       case 0:
@@ -46,21 +45,29 @@ export function QuestionCanvas({ questionIndex }: QuestionCanvasProps) {
   };
 
   return (
-    <div className="w-full h-full relative min-h-[300px] sm:min-h-[380px] lg:min-h-[460px] rounded-2xl overflow-hidden glass-panel border border-slate-700/50 shadow-2xl flex items-center justify-center">
-      {/* Question Scene Indicator Pill */}
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950/70 border border-amber-400/30 backdrop-blur-md">
-        <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-        <span className="text-xs font-mono font-semibold tracking-wider text-amber-300">
-          3D SIMULATION Q{questionIndex + 1}
+    <div className="w-full h-full relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] rounded-3xl overflow-hidden glass-panel border border-white/10 shadow-2xl flex items-center justify-center group">
+      {/* Aesthetic Top Tag */}
+      <div className="absolute top-4 left-4 z-10 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/80 border border-white/10 backdrop-blur-md shadow-lg">
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+        <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase font-semibold">
+          3D SIMULATION • PHASE 0{questionIndex + 1}
         </span>
       </div>
 
+      {/* Aesthetic Bottom Hint */}
+      <div className="absolute bottom-4 right-4 z-10 px-3 py-1 rounded-lg bg-slate-950/60 border border-white/5 backdrop-blur-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[10px] font-mono text-slate-400">Drag to orbit 3D model</span>
+      </div>
+
+      {/* Subtle Vignette Overlay */}
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-radial-gradient from-transparent via-transparent to-black/40 z-[5]" />
+
       <Canvas
-        camera={{ position: [0, 0, 4.5], fov: 50 }}
-        gl={{ antialias: true, alpha: true }}
+        camera={{ position: [0, 0, 4.4], fov: 48 }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
-        <color attach="background" args={['#080e21']} />
-        <Stars radius={30} depth={20} count={1200} factor={2} fade speed={0.6} />
+        <color attach="background" args={['#070b18']} />
+        <fog attach="fog" args={['#070b18', 3.8, 9.5]} />
 
         <Suspense fallback={null}>
           {renderScene()}
@@ -69,12 +76,12 @@ export function QuestionCanvas({ questionIndex }: QuestionCanvasProps) {
         <OrbitControls
           enableZoom={false}
           enablePan={false}
-          maxPolarAngle={Math.PI / 1.7}
-          minPolarAngle={Math.PI / 2.3}
-          rotateSpeed={0.5}
+          maxPolarAngle={Math.PI / 1.75}
+          minPolarAngle={Math.PI / 2.25}
+          rotateSpeed={0.4}
+          dampingFactor={0.05}
         />
       </Canvas>
     </div>
   );
 }
-

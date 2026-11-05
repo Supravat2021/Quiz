@@ -7,7 +7,6 @@ export function SceneQ7AspectRatio() {
   const frameGroupRef = useRef<THREE.Group>(null);
   const frustumGroupRef = useRef<THREE.Group>(null);
 
-  // 16:9 Dimensions scaled for 3D viewport
   const width = 2.4;
   const height = (width * 9) / 16; // 1.35
 
@@ -15,13 +14,13 @@ export function SceneQ7AspectRatio() {
     const t = clock.getElapsedTime();
 
     if (frameGroupRef.current) {
-      frameGroupRef.current.rotation.y = Math.sin(t * 0.8) * 0.35;
-      frameGroupRef.current.rotation.x = Math.cos(t * 0.6) * 0.15;
+      frameGroupRef.current.rotation.y = Math.sin(t * 0.5) * 0.25;
+      frameGroupRef.current.rotation.x = Math.cos(t * 0.4) * 0.1;
     }
 
     if (frustumGroupRef.current) {
-      frustumGroupRef.current.rotation.y = Math.sin(t * 0.8) * 0.35;
-      frustumGroupRef.current.rotation.x = Math.cos(t * 0.6) * 0.15;
+      frustumGroupRef.current.rotation.y = Math.sin(t * 0.5) * 0.25;
+      frustumGroupRef.current.rotation.x = Math.cos(t * 0.4) * 0.1;
     }
   });
 
@@ -34,57 +33,57 @@ export function SceneQ7AspectRatio() {
 
   return (
     <group>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[0, 2, 3]} intensity={2.5} color="#fbbf24" />
-      <pointLight position={[0, -2, 2]} intensity={2} color="#06b6d4" />
+      <ambientLight intensity={0.45} />
+      <pointLight position={[0, 2, 3]} intensity={2.2} color="#f5d061" />
+      <pointLight position={[0, -2, 2]} intensity={1.8} color="#2dd4bf" />
 
-      <Sparkles count={35} scale={5} size={2.5} speed={0.4} color="#fbbf24" />
+      <Sparkles count={30} scale={5} size={2} speed={0.3} color="#f5d061" opacity={0.35} />
 
-      {/* Main 16:9 Rotating Holographic Frame */}
-      <Float speed={2} rotationIntensity={0.4} floatIntensity={0.5}>
+      {/* Main 16:9 Rotating Holographic Viewport */}
+      <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.3}>
         <group ref={frameGroupRef}>
-          {/* Outer Border Bezel */}
+          {/* Outer Titanium Bezel */}
           <mesh>
-            <boxGeometry args={[width + 0.1, height + 0.1, 0.05]} />
+            <boxGeometry args={[width + 0.08, height + 0.08, 0.04]} />
             <meshStandardMaterial
-              color="#0f172a"
+              color="#090d19"
               emissive="#1e293b"
-              emissiveIntensity={0.5}
+              emissiveIntensity={0.4}
               roughness={0.2}
               metalness={0.9}
             />
           </mesh>
 
-          {/* Inner Glowing 16:9 Hologram Surface */}
-          <mesh position={[0, 0, 0.03]}>
+          {/* Inner Translucent 16:9 Hologram Surface */}
+          <mesh position={[0, 0, 0.025]}>
             <planeGeometry args={[width, height]} />
             <meshStandardMaterial
-              color="#06b6d4"
-              emissive="#0891b2"
-              emissiveIntensity={0.8}
+              color="#2dd4bf"
+              emissive="#0d9488"
+              emissiveIntensity={0.5}
               transparent
-              opacity={0.35}
+              opacity={0.25}
               roughness={0.1}
             />
           </mesh>
 
-          {/* Golden 16:9 Neon Perimeter Outline */}
-          <lineSegments position={[0, 0, 0.06]}>
+          {/* Champagne Gold Perimeter Outline */}
+          <lineSegments position={[0, 0, 0.045]}>
             <edgesGeometry args={[new THREE.PlaneGeometry(width, height)]} />
-            <lineBasicMaterial color="#fbbf24" linewidth={3} />
+            <lineBasicMaterial color="#f5d061" linewidth={2} />
           </lineSegments>
 
-          {/* Grid lines inside frame */}
-          <mesh position={[0, 0, 0.04]}>
-            <planeGeometry args={[width * 0.98, height * 0.98, 4, 3]} />
-            <meshBasicMaterial color="#38bdf8" wireframe transparent opacity={0.3} />
+          {/* Rule of Thirds Grid lines */}
+          <mesh position={[0, 0, 0.03]}>
+            <planeGeometry args={[width * 0.98, height * 0.98, 3, 3]} />
+            <meshBasicMaterial color="#38bdf8" wireframe transparent opacity={0.2} />
           </mesh>
 
-          {/* Corner Focus Brackets */}
+          {/* Minimalist Corner Crosshairs */}
           {corners.map(([cx, cy], i) => (
-            <mesh key={i} position={[cx, cy, 0.07]}>
-              <boxGeometry args={[0.2, 0.2, 0.04]} />
-              <meshBasicMaterial color="#fbbf24" wireframe />
+            <mesh key={i} position={[cx, cy, 0.05]}>
+              <boxGeometry args={[0.15, 0.15, 0.03]} />
+              <meshBasicMaterial color="#f5d061" wireframe />
             </mesh>
           ))}
         </group>
@@ -105,8 +104,8 @@ export function SceneQ7AspectRatio() {
 
           return (
             <mesh key={i} position={[mid.x, mid.y, mid.z]} rotation={euler}>
-              <cylinderGeometry args={[0.012, 0.012, len, 6]} />
-              <meshBasicMaterial color="#06b6d4" transparent opacity={0.4} />
+              <cylinderGeometry args={[0.008, 0.008, len, 6]} />
+              <meshBasicMaterial color="#2dd4bf" transparent opacity={0.35} />
             </mesh>
           );
         })}
